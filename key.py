@@ -1,4 +1,4 @@
-import rabird.winio
+import pywinio
 import time
 import atexit
 
@@ -8,33 +8,33 @@ KBC_KEY_CMD = 0x64
 # Data port
 KBC_KEY_DATA = 0x60
 
-__winio = None
+g_winio = None
 
-def __get_winio():
-    global __winio
+def get_winio():
+    global g_winio
 
-    if __winio is None:
-            __winio = rabird.winio.WinIO()
+    if g_winio is None:
+            g_winio = pywinio.WinIO()
             def __clear_winio():
-                    global __winio
-                    __winio = None
+                    global g_winio
+                    g_winio = None
             atexit.register(__clear_winio)
 
-    return __winio
+    return g_winio
 
 def wait_for_buffer_empty():
     '''
     Wait keyboard buffer empty
     '''
 
-    winio = __get_winio()
+    winio = get_winio()
 
     dwRegVal = 0x02
     while (dwRegVal & 0x02):
             dwRegVal = winio.get_port_byte(KBC_KEY_CMD)
 
 def key_down(scancode):
-    winio = __get_winio()
+    winio = get_winio()
 
     wait_for_buffer_empty();
     winio.set_port_byte(KBC_KEY_CMD, 0xd2);
@@ -42,7 +42,7 @@ def key_down(scancode):
     winio.set_port_byte(KBC_KEY_DATA, scancode)
 
 def SPkey_down(scancode):
-    winio = __get_winio()
+    winio = get_winio()
 
     wait_for_buffer_empty();
     winio.set_port_byte(KBC_KEY_CMD, 0xd2);
@@ -54,7 +54,7 @@ def SPkey_down(scancode):
     winio.set_port_byte(KBC_KEY_DATA, scancode)
 
 def key_up(scancode):
-    winio = __get_winio()
+    winio = get_winio()
 
     wait_for_buffer_empty();
     winio.set_port_byte( KBC_KEY_CMD, 0xd2);
@@ -62,7 +62,7 @@ def key_up(scancode):
     winio.set_port_byte( KBC_KEY_DATA, scancode | 0x80);
 
 def SPkey_up(scancode):
-    winio = __get_winio()
+    winio = get_winio()
 
     wait_for_buffer_empty();
     winio.set_port_byte(KBC_KEY_CMD, 0xd2);
@@ -74,7 +74,7 @@ def SPkey_up(scancode):
     winio.set_port_byte(KBC_KEY_DATA, scancode | 0x80)
 
 def mouse_down():
-    winio = __get_winio()
+    winio = get_winio()
 
     wait_for_buffer_empty();
     winio.set_port_byte(KBC_KEY_CMD, 0xd3);
@@ -82,7 +82,7 @@ def mouse_down():
     winio.set_port_dword(KBC_KEY_DATA, 0x09)
 
 def mouse_up():
-    winio = __get_winio()
+    winio = get_winio()
 
     wait_for_buffer_empty();
     winio.set_port_byte(KBC_KEY_CMD, 0xd3);
